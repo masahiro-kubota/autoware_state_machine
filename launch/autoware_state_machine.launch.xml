@@ -18,6 +18,7 @@
   <arg name="use_overridable_vehicle" default="true" />
 
   <node pkg="autoware_state_machine" exec="autoware_state_machine" name="autoware_state_machine" output="screen">
+    <remap from="input/delivery_reservation_button" to="/delivery_reservation_button_manager/output/delivery_reservation_button" />
     <param name="use_sim_time" value="$(env AW_ROS2_USE_SIM_TIME false)" />
     <param name="use_overridable_vehicle" value="$(var use_overridable_vehicle)" />
     <param name="stop_dist_to_prohibit_engage" value="0.30" />
