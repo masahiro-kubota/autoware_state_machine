@@ -20,7 +20,7 @@
 namespace autoware_state_machine
 {
 
-#define DEBUG_THROTTLE_TIME   0.05
+#define DEBUG_THROTTLE_TIME  5000  // ms
 
 void AutowareStateMachine::onAwapiAutowareState(
   const tier4_api_msgs::msg::AwapiAutowareStatus::ConstSharedPtr msg_ptr)
