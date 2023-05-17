@@ -43,7 +43,7 @@ void AutowareStateMachine::onAwapiAutowareState(
   stop_reason_ = "";
   cur_dist_to_stop_pose_ = dist_to_stop_pose_max_th_;
   if (msg_ptr->stop_reason.stop_reasons.size() != 0) {
-    for (const auto tmp_stop_reason : msg_ptr->stop_reason.stop_reasons) {
+    for (const auto & tmp_stop_reason : msg_ptr->stop_reason.stop_reasons) {
       if (tmp_stop_reason.reason ==
         tier4_planning_msgs::msg::StopReason::SURROUND_OBSTACLE_CHECK)
       {
@@ -53,7 +53,7 @@ void AutowareStateMachine::onAwapiAutowareState(
       }
 
       if (tmp_stop_reason.stop_factors.size() != 0) {
-        for (const auto tmp_stop_factor : tmp_stop_reason.stop_factors) {
+        for (const auto & tmp_stop_factor : tmp_stop_reason.stop_factors) {
           if (std::abs(tmp_stop_factor.dist_to_stop_pose) <= double_epsilon) {
             cur_dist_to_stop_pose_ = 0.0;
             stop_reason_ = tmp_stop_reason.reason;
@@ -61,9 +61,9 @@ void AutowareStateMachine::onAwapiAutowareState(
             cur_dist_to_stop_pose_ = tmp_stop_factor.dist_to_stop_pose;
             stop_reason_ = tmp_stop_reason.reason;
           }
-        }  // for(const auto tmp_stop_factor : tmp_stop_reason.stop_factors)
+        }  // for(const auto & tmp_stop_factor : tmp_stop_reason.stop_factors)
       }  // if(tmp_stop_reason.stop_factors.size() != 0)
-    }  // for(const auto tmp_stop_reason : msg_ptr->stop_reason.stop_reasons)
+    }  // for(const auto & tmp_stop_reason : msg_ptr->stop_reason.stop_reasons)
   }  // if(msg_ptr->stop_reason.stop_reasons.size() != 0)
 
   ChangeState();
