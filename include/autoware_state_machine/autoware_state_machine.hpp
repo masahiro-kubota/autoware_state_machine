@@ -180,6 +180,8 @@ private:
   void setEngageProcess(bool request, bool accept);
   std::pair<bool, bool> getEngageProcess(void);
   bool waitingForEngageAccept(void);
+  std::pair<std::string, double> getNearestStopReasonWithPriority(
+    const std::vector<tier4_planning_msgs::msg::StopReason> & stop_reasons);
 };
 
 }  // namespace autoware_state_machine
