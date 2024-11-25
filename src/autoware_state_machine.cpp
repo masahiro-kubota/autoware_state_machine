@@ -130,6 +130,7 @@ void AutowareStateMachine::execEngageProcess(
     *this->get_clock(), DEBUG_THROTTLE_TIME,
     "[autoware_state_machine] Engage Request Is %d ",
     request->engage);
+    
 
   if (current_control_layer_state_ == autoware_state_machine_msgs::msg::StateMachine::MANUAL) {
     RCLCPP_WARN_THROTTLE(
@@ -290,6 +291,7 @@ void AutowareStateMachine::onCallsDeliveryReservationButton(
     state_lock.stamp = this->now();
     state_lock.state = current_delivery_reservation_state_;
     pub_delivery_reservation_state_->publish(state_lock);
+    RCLCPP_INFO(this->get_logger(), "lock_state published 1.");
   } else {
     // When the lock status is ON, ask the web server if it can be turned OFF.
     change_lock.flg = false;
@@ -360,6 +362,7 @@ void AutowareStateMachine::onCallsVehicleState(
     pub.stamp = this->now();
     pub.state = current_delivery_reservation_state_;
     pub_delivery_reservation_state_->publish(pub);
+    RCLCPP_INFO(this->get_logger(), "lock_state published 2.");
   }
 
   /* The voice flag only has meaning for the transition from False to True.
@@ -414,6 +417,7 @@ void AutowareStateMachine::onTimer()
       pub.stamp = this->now();
       pub.state = current_delivery_reservation_state_;
       pub_delivery_reservation_state_->publish(pub);
+      RCLCPP_INFO(this->get_logger(), "lock_state published 3.");
     }
   }
 
@@ -491,6 +495,7 @@ void AutowareStateMachine::onTimer()
 
 void AutowareStateMachine::ChangeState(void)
 {
+  RCLCPP_INFO(this->get_logger(), "ChangeState executed");
   ChangeStateReturnItem service_layer_ret;
   ChangeStateReturnItem control_layer_ret;
   builtin_interfaces::msg::Time wait_done_time = this->now();
@@ -513,16 +518,19 @@ void AutowareStateMachine::ChangeState(void)
       current_service_layer_state_ =
         autoware_state_machine_msgs::msg::StateMachine::STATE_CHECK_NODE_ALIVE;
       service_layer_ret = ChangeStateReturnItem::TRANSITION;
+      RCLCPP_INFO(this->get_logger(), "[StateBreak] Breaking from STATE_UNDEFINED");
       break;
 
     /* -------------------------------------------------------------- */
     case autoware_state_machine_msgs::msg::StateMachine::STATE_CHECK_NODE_ALIVE:
       service_layer_ret = changeState4NodeAlive();
+      RCLCPP_INFO(this->get_logger(), "[StateBreak] Breaking from STATE_CHECK_NODE_ALIVE");
       break;
 
     /* -------------------------------------------------------------- */
     case autoware_state_machine_msgs::msg::StateMachine::STATE_DURING_WAKEUP:
       service_layer_ret = changeState4DuringWakeup();
+      RCLCPP_INFO(this->get_logger(), "[StateBreak] Breaking from STATE_DURING_WAKEUP");
       break;
 
     /* -------------------------------------------------------------- */
@@ -530,26 +538,31 @@ void AutowareStateMachine::ChangeState(void)
       // Normal  Pattern
       flag_init_state_machine_ = false;
       service_layer_ret = ChangeStateReturnItem::NONE;
+      RCLCPP_INFO(this->get_logger(), "[StateBreak] Breaking from STATE_DURING_CLOSE");
       break;
 
     case autoware_state_machine_msgs::msg::StateMachine::STATE_DURING_RECEIVE_ROUTE:
       service_layer_ret = changeState4DuringReceiveRoute();
+      RCLCPP_INFO(this->get_logger(), "[StateBreak] Breaking from STATE_DURING_RECEIVE_ROUTE");
       break;
 
     /* -------------------------------------------------------------- */
     case autoware_state_machine_msgs::msg::StateMachine::STATE_WAITING_ENGAGE_INSTRUCTION:
     case autoware_state_machine_msgs::msg::StateMachine::STATE_WAITING_CALL_PERMISSION:
       service_layer_ret = changeState4WaintingEngageInstruction();
+      RCLCPP_INFO(this->get_logger(), "[StateBreak] Breaking from STATE_WAITING_ENGAGE_INSTRUCTION or STATE_WAITING_CALL_PERMISSION");
       break;
 
     /* -------------------------------------------------------------- */
     case autoware_state_machine_msgs::msg::StateMachine::STATE_INFORM_ENGAGE:
       service_layer_ret = changeState4InformEngage();
+      RCLCPP_INFO(this->get_logger(), "[StateBreak] Breaking from STATE_INFROM_ENGAGE");
       break;
 
     /* -------------------------------------------------------------- */
     case autoware_state_machine_msgs::msg::StateMachine::STATE_INSTRUCT_ENGAGE:
       service_layer_ret = changeState4InstructEngage();
+      RCLCPP_INFO(this->get_logger(), "[StateBreak] Breaking from STATE_INSTRUCT_ENGAGE");
       break;
 
     /* -------------------------------------------------------------- */
@@ -563,30 +576,36 @@ void AutowareStateMachine::ChangeState(void)
     case autoware_state_machine_msgs::msg::StateMachine::STATE_STOP_DUETO_SURROUNDING_PROXIMITY:
     case autoware_state_machine_msgs::msg::StateMachine::STATE_INFORM_RESTART:
       service_layer_ret = changeState4RunAndStop();
+      RCLCPP_INFO(this->get_logger(), "[StateBreak] Breaking from STATE_RUNNING etc");
       break;
 
     /* -------------------------------------------------------------- */
     case autoware_state_machine_msgs::msg::StateMachine::STATE_DURING_OBSTACLE_AVOIDANCE:
       service_layer_ret = changeState4DuringObstacleAvoidance();
+      RCLCPP_INFO(this->get_logger(), "[StateBreak] Breaking from STATE_DURING_OBSTACLE_AVOIDANCE");
       break;
 
     /* -------------------------------------------------------------- */
     case autoware_state_machine_msgs::msg::StateMachine::STATE_ARRIVED_GOAL:
+      RCLCPP_INFO(this->get_logger(), "[StateBreak] Breaking from STATE_ARRIVED_GOAL");
       service_layer_ret = changeState4Arrived();
       break;
 
     /* -------------------------------------------------------------- */
     case autoware_state_machine_msgs::msg::StateMachine::STATE_EMERGENCY_STOP:
       service_layer_ret = changeState4Emergency();
+      RCLCPP_INFO(this->get_logger(), "[StateBreak] Breaking from STATE_EMERGENCY_STOP");
       break;
 
     /* -------------------------------------------------------------- */
     default:
       service_layer_ret = ChangeStateReturnItem::ERROR;
+      RCLCPP_INFO(this->get_logger(), "[StateBreak] Breaking from ERROR");
       break;
   }
 
   control_layer_ret = changeControlLayerState();
+  RCLCPP_INFO(this->get_logger(), "service_layer_ret is %i", service_layer_ret);
 
   if (service_layer_ret == ChangeStateReturnItem::TRANSITION ||
     control_layer_ret == ChangeStateReturnItem::TRANSITION)
@@ -602,6 +621,7 @@ void AutowareStateMachine::ChangeState(void)
     pub.service_layer_state = current_service_layer_state_;
     pub.control_layer_state = current_control_layer_state_;
     pub_state_->publish(pub);
+    RCLCPP_INFO(this->get_logger(), "pub_state is published 1");
   } else if (service_layer_ret == ChangeStateReturnItem::ERROR) {
     // Make error notification
     RCLCPP_ERROR_STREAM(
@@ -703,6 +723,7 @@ ChangeStateReturnItem AutowareStateMachine::changeState4DuringReceiveRoute(void)
   if (cur_emergency_holding_ == true) {
     current_service_layer_state_ =
       autoware_state_machine_msgs::msg::StateMachine::STATE_EMERGENCY_STOP;
+    RCLCPP_INFO(this->get_logger(), "1cur_autoware_state_ is %i", cur_autoware_state_);
     return ChangeStateReturnItem::TRANSITION;
   }
 
@@ -710,6 +731,7 @@ ChangeStateReturnItem AutowareStateMachine::changeState4DuringReceiveRoute(void)
   if ( (cur_autoware_state_ == tier4_system_msgs::msg::AutowareState::WAITING_FOR_ROUTE) ||
     (cur_autoware_state_ == tier4_system_msgs::msg::AutowareState::PLANNING) )
   {
+    RCLCPP_INFO(this->get_logger(), "2cur_autoware_state_ is %i", cur_autoware_state_);
     return ChangeStateReturnItem::NONE;
   }
 
@@ -718,6 +740,7 @@ ChangeStateReturnItem AutowareStateMachine::changeState4DuringReceiveRoute(void)
     flag_calls_vehicle_voice_ = false;
     current_service_layer_state_ =
       autoware_state_machine_msgs::msg::StateMachine::STATE_WAITING_ENGAGE_INSTRUCTION;
+    RCLCPP_INFO(this->get_logger(), "3cur_autoware_state_ is %i", cur_autoware_state_);
     return ChangeStateReturnItem::TRANSITION;
   }
 
@@ -725,6 +748,7 @@ ChangeStateReturnItem AutowareStateMachine::changeState4DuringReceiveRoute(void)
   if (cur_autoware_state_ == tier4_system_msgs::msg::AutowareState::INITIALIZING_VEHICLE) {
     current_service_layer_state_ =
       autoware_state_machine_msgs::msg::StateMachine::STATE_DURING_WAKEUP;
+    RCLCPP_INFO(this->get_logger(), "4cur_autoware_state_ is %i", cur_autoware_state_);
     return ChangeStateReturnItem::TRANSITION;
   }
 
